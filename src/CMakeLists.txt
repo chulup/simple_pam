@@ -1,0 +1,15 @@
+set(PAM_SOURCES
+    simple_pam.cpp
+)
+set(PAM_TESTER
+    test.c
+)
+
+add_library(simple_pam SHARED ${PAM_SOURCES})
+set_target_properties(simple_pam
+    PROPERTIES
+    PREFIX ""
+)
+
+add_executable(pam_test ${PAM_TESTER})
+target_link_libraries(pam_test ${PAM_LIBRARIES})
