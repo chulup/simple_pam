@@ -16,14 +16,22 @@ set_target_properties(simple_pam
     PREFIX ""
     CXX_STANDARD 14
 )
-target_include_directories(simple_pam
-    SYSTEM
-    PRIVATE ${Poco_INCLUDE_DIRS}
-)
 target_link_libraries(simple_pam 
     ${PAM_LIBRARIES}
-    ${Poco_LIBRARIES}
 )
+
+if (ENABLE_POCO)
+    target_include_directories(simple_pam
+        SYSTEM
+        PRIVATE ${Poco_INCLUDE_DIRS}
+    )
+    target_link_libraries(simple_pam 
+        ${Poco_LIBRARIES}
+    )
+endif()
+
+install(TARGETS simple_pam 
+    LIBRARY DESTINATION lib)
 
 add_executable(pam_test ${PAM_TESTER})
 target_link_libraries(pam_test 

@@ -1,3 +1,5 @@
+#ifdef ENABLE_POCO
+
 #include "authenticator.h"
 #include <string>
 
@@ -5,21 +7,26 @@
 
 class JSONConfigAuthenticator : public Authenticator {
 public:
-    std::string get_prompt(const std::string &username) override {
-        random = std::random_device{} ();
+    JSONConfigAuthenticator(const std::string &config) :
+        _config(config) {
+    }
 
-        return std::string("Type \"") + std::to_string(random) + "\": ";
+
+    std::string get_prompt(const std::string &username) override {
+        return "";
     }
     bool check_response(const std::string& username,
                         const std::string& response) override {
-        return response == std::to_string(random);
+        return true;
     }
 
 private:
-    unsigned int random;
+    Poco::Util::JSONConfiguration _config;
 };
 
 std::unique_ptr<Authenticator> get_json_authenticator(const std::string &config) {
-    std::unique_ptr<Authenticator> ret{new JSONConfigAuthenticator{}};
+    std::unique_ptr<Authenticator> ret{new JSONConfigAuthenticator{config}};
     return ret;
 }
+
+#endif // ENABLE_POCO
