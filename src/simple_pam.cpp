@@ -1,5 +1,8 @@
 #include <memory>
+
+#ifdef DEBUG
 #include <iostream>
+#endif
 
 #include <security/pam_appl.h>
 #include <security/pam_ext.h>
@@ -28,7 +31,9 @@ std::string value_for_key(int argc, const char **argv, const std::string &key) {
 
 std::unique_ptr<Authenticator> get_authenticator(int argc, const char **argv) {
     auto type = value_for_key(argc, argv, "type");
+#ifdef DEBUG
     std::cout << "auth type: " << type << std::endl;
+#endif
     if (type == "random") {
         return get_random_authenticator();
     } else if (type == "json") {
@@ -50,11 +55,15 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
     if (retval != PAM_SUCCESS) {
         return retval;
     }
+#ifdef DEBUG
     std::cout << "username: " << username << std::endl;
+#endif
 
     auto authenticator = get_authenticator(argc, argv);
     auto prompt = authenticator->get_prompt(username);
+#ifdef DEBUG
     std::cout << "prompt: " << prompt << std::endl;
+#endif
     if (!prompt.empty()) {
         char *response = NULL;
         retval = pam_prompt(pamh,
