@@ -28,5 +28,4 @@ target_link_libraries(simple_pam
 add_executable(pam_test ${PAM_TESTER})
 target_link_libraries(pam_test 
     ${PAM_LIBRARIES}
-    ${Poco_LIBRARIES}
 )
