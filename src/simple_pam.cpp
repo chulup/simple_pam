@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <random>
 #include <string>
 
@@ -34,15 +35,17 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
             &response,
             "Type \"%s\": ",
             request.c_str());;
+        std::unique_ptr<char, decltype(free) *> resp_p {response, free};
+
         if (retval != PAM_SUCCESS) {
             return retval;
         }
 
-        if (!response) {
+        if (!resp_p) {
             return PAM_AUTH_ERR;
         }
 
-        if (request != response) {
+        if (request != resp_p.get()) {
             return PAM_AUTH_ERR;
         }
     }
