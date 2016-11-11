@@ -20,7 +20,7 @@ std::string value_for_key(int argc, const char **argv, const std::string &key) {
         }
     }
     if (i < argc) {
-        return std::string(argv[i]).substr(key.length());
+        return std::string(argv[i]).substr(key.length()+1);
     } else {
         return "";
     }
