@@ -1,13 +1,10 @@
-#include <iostream>
 #include <memory>
-#include <random>
-#include <string>
 
 #include <security/pam_appl.h>
 #include <security/pam_ext.h>
 #include <security/pam_modules.h>
 
-//#include "authenticator.h"
+#include "authenticator.h"
 
 /* expected hook */
 PAM_EXTERN int pam_sm_setcred( pam_handle_t *pamh, int flags, int argc, const char **argv ) {
@@ -27,14 +24,17 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
     }
     
     {
-        std::string request = std::to_string(std::random_device{} ());
+        auto authenticator = get_random_authenticator();
         char *response = NULL;
 
         retval = pam_prompt(pamh,
             PAM_PROMPT_ECHO_ON,
             &response,
-            "Type \"%s\": ",
-            request.c_str());;
+            "%s",
+            authenticator->get_prompt(username).c_str());
+
+        // Do not use response after that line!
+        // TODO: check if it is legal to provide resp_p.get() to pam_prompt
         std::unique_ptr<char, decltype(free) *> resp_p {response, free};
 
         if (retval != PAM_SUCCESS) {
@@ -45,7 +45,7 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
             return PAM_AUTH_ERR;
         }
 
-        if (request != resp_p.get()) {
+        if (!authenticator->check_response(username, response)) {
             return PAM_AUTH_ERR;
         }
     }
