@@ -5,7 +5,7 @@ set(PAM_SOURCES
     random_authenticator.cpp
 )
 set(PAM_TESTER
-    test.c
+    test.cpp
 )
 
 set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
@@ -33,7 +33,21 @@ endif()
 install(TARGETS simple_pam 
     LIBRARY DESTINATION lib)
 
+
 add_executable(pam_test ${PAM_TESTER})
 target_link_libraries(pam_test 
     ${PAM_LIBRARIES}
 )
+if (ENABLE_POCO)
+    target_include_directories(pam_test
+        SYSTEM
+        PRIVATE ${Poco_INCLUDE_DIRS}
+    )
+    target_link_libraries(pam_test
+#        ${Poco_Foundation_LIBRARY}
+#        ${Poco_Util_LIBRARY}
+#        ${Poco_XML_LIBRARY}
+#        ${Poco_JSON_LIBRARY}
+        ${Poco_LIBRARIES}
+    )
+endif()

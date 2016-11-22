@@ -2,12 +2,22 @@
 #include <security/pam_misc.h>
 #include <stdio.h>
 
+#include <Poco/AutoPtr.h>
+#include <Poco/Util/JSONConfiguration.h>
+
 const struct pam_conv conv = {
     misc_conv,
     NULL
 };
 
+
+using Poco::AutoPtr;
+using Poco::Util::JSONConfiguration;
+
 int main(int argc, char *argv[]) {
+    AutoPtr<JSONConfiguration> config(new JSONConfiguration("simple-pam.conf"));
+
+
     pam_handle_t* pamh = NULL;
     int retval;
     const char* user = "nobody";
