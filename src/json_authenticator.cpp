@@ -19,6 +19,10 @@ public:
         _config_file(config) 
     {
         std::fstream conf_file(config);
+        if (!conf_file.is_open()) {
+            throw std::logic_error("Can't open config file");
+        }
+
         _config = json::parse(conf_file);
 
         _auth_id = _config.value("auth-key", "");
@@ -65,8 +69,12 @@ public:
             const std::string& response) override {
         const auto user = _config["users"].value(username, json::object());
         const auto id = user.value("id", "");
+        if (id.empty()) {
+            throw std::logic_error("No entry for user");
+        }
 
-        auto result = cpr::Get(api_verify + response + "/" + id, _auth_id);
+        auto result = cpr::Get(api_verify + response + "/" + id, 
+                cpr::Header{{"X-Authy-API-Key", _auth_id}});
 #ifdef DEBUG
         std::cout << result.status_code << "\n"
             << result.header["context-type"]

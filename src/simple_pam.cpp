@@ -37,7 +37,7 @@ std::unique_ptr<Authenticator> get_authenticator(int argc, const char **argv) {
     if (type == "random") {
         return get_random_authenticator();
     } 
-    else if (type == "json") {
+    else if (type == "authy") {
         auto config = value_for_key(argc, argv, "config");
         if (!config.empty()) {
             return get_json_authenticator(config);
@@ -60,6 +60,7 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
     std::cout << "username: " << username << std::endl;
 #endif
 
+    try {
     auto authenticator = get_authenticator(argc, argv);
     auto prompt = authenticator->get_prompt(username);
 #ifdef DEBUG
@@ -88,6 +89,11 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
         if (!authenticator->check_response(username, response)) {
             return PAM_AUTH_ERR;
         }
+    }
+    } catch(std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        // return SUCESS and investigate problem later
+        return PAM_SUCCESS;
     }
 
     return PAM_SUCCESS;
