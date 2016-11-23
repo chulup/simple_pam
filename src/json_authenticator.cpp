@@ -34,6 +34,15 @@ public:
         }
     }
 
+    bool known_user(const std::string &username) override {
+        const auto user = _config["users"].value(username, json::object());
+        const auto id = user.value("id", "");
+        if (id.empty()) {
+            return false;
+        }
+        return true;
+    }
+
 
     std::string get_prompt(const std::string &username) override {
         const auto user = _config["users"].value(username, json::object());

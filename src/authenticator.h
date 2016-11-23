@@ -9,6 +9,9 @@ public:
     virtual std::string get_prompt(const std::string &username) = 0;
     virtual bool check_response(const std::string& username,
                                 const std::string& response) = 0;
+    virtual bool known_user(const std::string &username) {
+        return true;
+    }
 };
 
 std::unique_ptr<Authenticator> get_empty_authenticator();

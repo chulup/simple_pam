@@ -60,19 +60,39 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
     std::cout << "username: " << username << std::endl;
 #endif
 
+    std::unique_ptr<Authenticator> authenticator;
     try {
-    auto authenticator = get_authenticator(argc, argv);
+        authenticator = get_authenticator(argc, argv);
+    } catch (std::exception &e) {
+        std::cerr << e.what();
+        return PAM_AUTHINFO_UNAVAIL;
+    }
+
+    try {
+        if (!authenticator->known_user(username)) {
+            return PAM_USER_UNKNOWN;
+        }
+    } catch(std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return PAM_AUTH_ERR;
+    }
+
     auto prompt = authenticator->get_prompt(username);
 #ifdef DEBUG
     std::cout << "prompt: " << prompt << std::endl;
 #endif
     if (!prompt.empty()) {
         char *response = NULL;
-        retval = pam_prompt(pamh,
-                PAM_PROMPT_ECHO_ON,
-                &response,
-                "%s",
-                prompt.c_str());
+        try {
+            retval = pam_prompt(pamh,
+                    PAM_PROMPT_ECHO_ON,
+                    &response,
+                    "%s",
+                    prompt.c_str());
+        } catch(std::exception &e) {
+            std::cerr << e.what() << std::endl;
+            return PAM_AUTHINFO_UNAVAIL;
+        }
 
         // Do not use response after that line!
         // TODO: check if it is legal to provide resp_p.get() to pam_prompt
@@ -86,14 +106,14 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
             return PAM_AUTH_ERR;
         }
 
-        if (!authenticator->check_response(username, response)) {
-            return PAM_AUTH_ERR;
+        try{
+            if (!authenticator->check_response(username, response)) {
+                return PAM_AUTH_ERR;
+            }
+        } catch(std::exception &e) {
+            std::cerr << e.what() << std::endl;
+            return PAM_AUTHINFO_UNAVAIL;
         }
-    }
-    } catch(std::exception &e) {
-        std::cerr << e.what() << std::endl;
-        // return SUCESS and investigate problem later
-        return PAM_SUCCESS;
     }
 
     return PAM_SUCCESS;
