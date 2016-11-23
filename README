@@ -1,0 +1,5 @@
+Add following line to /etc/pam.d/common-auth
+
+auth required simple_pam.so type=authy config=/path/to/config/simple-pam.json
+
+You have to specify Authy ID and User Id in config file for module to work. Look at example config simple-pam.json
