@@ -13,8 +13,4 @@ public:
 
 std::unique_ptr<Authenticator> get_empty_authenticator();
 std::unique_ptr<Authenticator> get_random_authenticator();
-
-#ifdef ENABLE_POCO
 std::unique_ptr<Authenticator> get_json_authenticator(const std::string &config);
-#endif // ENABLE_POCO
-

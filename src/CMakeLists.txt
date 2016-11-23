@@ -14,17 +14,30 @@ add_library(simple_pam SHARED ${PAM_SOURCES})
 set_target_properties(simple_pam
     PROPERTIES
     PREFIX ""
-    CXX_STANDARD 14
 )
-target_link_libraries(simple_pam 
+target_link_libraries(simple_pam
     ${PAM_LIBRARIES}
+    ${CPR_LIBRARIES}
+)
+target_include_directories(simple_pam
+    PRIVATE
+    ${CPR_INCLUDE_DIRS}
+    ${JSON_INCLUDE_DIRS}
 )
 
 install(TARGETS simple_pam 
     LIBRARY DESTINATION lib)
 
 
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fPIC)
+
 add_executable(pam_test ${PAM_TESTER})
 target_link_libraries(pam_test 
     ${PAM_LIBRARIES}
+    ${CPR_LIBRARIES}
+)
+target_include_directories(pam_test
+    PRIVATE
+    ${CPR_INCLUDE_DIRS}
+    ${JSON_INCLUDE_DIRS}
 )

@@ -37,14 +37,12 @@ std::unique_ptr<Authenticator> get_authenticator(int argc, const char **argv) {
     if (type == "random") {
         return get_random_authenticator();
     } 
-#ifdef ENABLE_POCO
     else if (type == "json") {
         auto config = value_for_key(argc, argv, "config");
         if (!config.empty()) {
             return get_json_authenticator(config);
         }
     }
-#endif // ENABLE_POCO
     return get_empty_authenticator();
 }
 
