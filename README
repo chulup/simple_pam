@@ -1,5 +1,11 @@
-Add following line to /etc/pam.d/common-auth
+Add simple_pam.so module to your PAM configuration files. 
+For example, on Ubuntu you may want to add it after pam_deny.so like that:
 
-auth required simple_pam.so type=authy config=/path/to/config/simple-pam.json
+> auth    [success=1 default=ignore]  pam_unix.so nullok_secure
+> auth    requisite           pam_deny.so
+> auth [success=ok authinfo_unavail=ignore user_unknown=ignore default=bad]  simple_pam.so type=authy config=/path/to/simple-pam.json
+
+That configuration requires user to input their authorization token from Authy app or SMS, but only if there is configuration file and it has record for user, otherwise additional input is not required.
+
 
 You have to specify Authy ID and User Id in config file for module to work. Look at example config simple-pam.json
