@@ -83,16 +83,11 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
 #endif
     if (!prompt.empty()) {
         char *response = NULL;
-        try {
-            retval = pam_prompt(pamh,
-                    PAM_PROMPT_ECHO_ON,
-                    &response,
-                    "%s",
-                    prompt.c_str());
-        } catch(std::exception &e) {
-            std::cerr << e.what() << std::endl;
-            return PAM_AUTHINFO_UNAVAIL;
-        }
+        retval = pam_prompt(pamh,
+                PAM_PROMPT_ECHO_ON,
+                &response,
+                "%s",
+                prompt.c_str());
 
         // Do not use response after that line!
         // TODO: check if it is legal to provide resp_p.get() to pam_prompt

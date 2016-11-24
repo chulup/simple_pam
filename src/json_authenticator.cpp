@@ -37,6 +37,9 @@ public:
     bool known_user(const std::string &username) override {
         const auto user = _config["users"].value(username, json::object());
         const auto id = user.value("id", "");
+#ifdef DEBUG
+        std::cout << "Username \"" << username << "\" id=" << id << std::endl;
+#endif
         if (id.empty()) {
             return false;
         }
