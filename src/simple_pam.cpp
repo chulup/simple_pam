@@ -60,55 +60,59 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
     std::cout << "username: " << username << std::endl;
 #endif
 
-    std::unique_ptr<Authenticator> authenticator;
     try {
-        authenticator = get_authenticator(argc, argv);
-    } catch (std::exception &e) {
-        std::cerr << e.what();
-        return PAM_AUTHINFO_UNAVAIL;
-    }
+        auto authenticator = get_authenticator(argc, argv);
 
-    try {
-        if (!authenticator->known_user(username)) {
-            return PAM_USER_UNKNOWN;
-        }
-    } catch(std::exception &e) {
-        std::cerr << e.what() << std::endl;
-        return PAM_AUTH_ERR;
-    }
-
-    auto prompt = authenticator->get_prompt(username);
+        auto prompt = authenticator->get_prompt(username);
 #ifdef DEBUG
-    std::cout << "prompt: " << prompt << std::endl;
+        std::cout << "prompt: " << prompt << std::endl;
 #endif
-    if (!prompt.empty()) {
-        char *response = NULL;
-        retval = pam_prompt(pamh,
-                PAM_PROMPT_ECHO_ON,
-                &response,
-                "%s",
-                prompt.c_str());
+        if (!prompt.empty()) {
+            char *response = NULL;
+            retval = pam_prompt(pamh,
+                    PAM_PROMPT_ECHO_ON,
+                    &response,
+                    "%s",
+                    prompt.c_str());
 
-        // Do not use response after that line!
-        // TODO: check if it is legal to provide resp_p.get() to pam_prompt
-        std::unique_ptr<char, decltype(::free) *> resp_p {response, ::free};
+            // Do not use response after that line!
+            // TODO: check if it is legal to provide resp_p.get() to pam_prompt
+            std::unique_ptr<char, decltype(::free) *> resp_p {response, ::free};
 
-        if (retval != PAM_SUCCESS) {
-            return retval;
-        }
+            if (retval != PAM_SUCCESS) {
+                return retval;
+            }
 
-        if (!resp_p) {
-            return PAM_AUTH_ERR;
-        }
+            if (!resp_p) {
+                return PAM_CONV_ERR;
+            }
 
-        try{
             if (!authenticator->check_response(username, response)) {
                 return PAM_AUTH_ERR;
             }
-        } catch(std::exception &e) {
-            std::cerr << e.what() << std::endl;
-            return PAM_AUTHINFO_UNAVAIL;
         }
+    } catch(AuthError &e) {
+        std::cerr << e.what() << std::endl;
+
+        switch (e.error) {
+        case Errors::general:
+            return PAM_SERVICE_ERR;
+
+        case Errors::user_unknown:
+            return PAM_USER_UNKNOWN;
+
+        case Errors::connection:
+            return PAM_AUTHINFO_UNAVAIL;
+
+        case Errors::config:
+            return PAM_AUTHINFO_UNAVAIL;
+
+        default:
+            return PAM_SERVICE_ERR;
+        }
+    } catch(std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return PAM_SERVICE_ERR;
     }
 
     return PAM_SUCCESS;

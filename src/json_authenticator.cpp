@@ -1,7 +1,6 @@
 #include "authenticator.h"
 
 #include <fstream>
-#include <stdexcept>
 #include <string>
 #include <cpr/cpr.h>
 #include <json.hpp>
@@ -20,38 +19,25 @@ public:
     {
         std::fstream conf_file(config);
         if (!conf_file.is_open()) {
-            throw std::logic_error("Can't open config file");
+            throw AuthError(Errors::config, "Unable to open config file");
         }
 
         _config = json::parse(conf_file);
 
         _auth_id = _config.value("auth-key", "");
         if (_auth_id.empty()) {
-            throw std::logic_error("No Auth Key specified in config file");
+            throw AuthError(Errors::config, "No Auth Key specified in config file");
         }
         if (_config.find("users") == _config.end()) {
-            throw std::logic_error("No users listed in config file");
+            throw AuthError(Errors::config, "No users listed in config file");
         }
     }
-
-    bool known_user(const std::string &username) override {
-        const auto user = _config["users"].value(username, json::object());
-        const auto id = user.value("id", "");
-#ifdef DEBUG
-        std::cout << "Username \"" << username << "\" id=" << id << std::endl;
-#endif
-        if (id.empty()) {
-            return false;
-        }
-        return true;
-    }
-
 
     std::string get_prompt(const std::string &username) override {
         const auto user = _config["users"].value(username, json::object());
         const auto id = user.value("id", "");
         if (id.empty()) {
-            throw std::logic_error("No entry for user");
+            throw AuthError(Errors::user_unknown, "No entry for user");
         }
 
         auto response = cpr::Get(api_request + id,
@@ -66,8 +52,8 @@ public:
         std::cout << json.dump(4) << std::endl;
 #endif
 
-        if (!json.value("success", false)) {
-            throw std::logic_error(string("Token request failed: ") + json.value("message", "No message"));
+        if (json.value("success", false) == false) {
+            throw AuthError(Errors::connection, string("Token request failed: ") + json.value("message", "No message"));
         }
 
         if (json.value("ignored", false)) {
@@ -82,7 +68,7 @@ public:
         const auto user = _config["users"].value(username, json::object());
         const auto id = user.value("id", "");
         if (id.empty()) {
-            throw std::logic_error("No entry for user");
+            throw AuthError(Errors::user_unknown, "No entry for user");
         }
 
         auto result = cpr::Get(api_verify + response + "/" + id, 
