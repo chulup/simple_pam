@@ -26,7 +26,7 @@ target_include_directories(simple_pam
 )
 
 install(TARGETS simple_pam 
-    LIBRARY DESTINATION lib)
+    LIBRARY DESTINATION ./)
 
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fPIC)
