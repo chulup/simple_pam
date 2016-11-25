@@ -1,3 +1,12 @@
+BUILD:
+
+0. You will need: libcurl-dev, pam-dev, cmake
+1. Run "git submodule update --init --recursive" to fetch subprojects
+2. Run CMake: "mkdir build && cd build && cmake ../ -DCMAKE_INSTALL_PREFIX=/lib/security"
+3. Compile and install: "make && sudo make install"
+4. Set up the configuration
+
+
 Add simple_pam.so module to your PAM configuration files. 
 For example, on Ubuntu you may want to add it after pam_deny.so like that:
 
