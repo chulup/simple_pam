@@ -1,7 +1,7 @@
 set(PAM_SOURCES
     simple_pam.cpp
     empty_authenticator.cpp
-    json_authenticator.cpp
+    authy_authenticator.cpp
     random_authenticator.cpp
 )
 set(PAM_TESTER

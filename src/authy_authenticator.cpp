@@ -12,9 +12,9 @@ static const cpr::Url api_url = "http://api.authy.com/protected/json/";
 static const auto api_request = api_url + "sms/";
 static const auto api_verify = api_url + "verify/";
 
-class JSONConfigAuthenticator : public Authenticator {
+class AuthyAuthenticator : public Authenticator {
 public:
-    JSONConfigAuthenticator(const std::string &config) :
+    AuthyAuthenticator(const std::string &config) :
         _config_file(config) 
     {
         std::fstream conf_file(config);
@@ -87,7 +87,7 @@ private:
     nlohmann::json _config;
 };
 
-std::unique_ptr<Authenticator> get_json_authenticator(const std::string &config) {
-    std::unique_ptr<Authenticator> ret{new JSONConfigAuthenticator{config}};
+std::unique_ptr<Authenticator> get_authy_authenticator(const std::string &config) {
+    std::unique_ptr<Authenticator> ret{new AuthyAuthenticator{config}};
     return ret;
 }

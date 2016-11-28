@@ -40,7 +40,7 @@ std::unique_ptr<Authenticator> get_authenticator(int argc, const char **argv) {
     else if (type == "authy") {
         auto config = value_for_key(argc, argv, "config");
         if (!config.empty()) {
-            return get_json_authenticator(config);
+            return get_authy_authenticator(config);
         }
     }
     return get_empty_authenticator();

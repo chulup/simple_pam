@@ -14,7 +14,7 @@ public:
 
 std::unique_ptr<Authenticator> get_empty_authenticator();
 std::unique_ptr<Authenticator> get_random_authenticator();
-std::unique_ptr<Authenticator> get_json_authenticator(const std::string &config);
+std::unique_ptr<Authenticator> get_authy_authenticator(const std::string &config);
 
 enum class Errors {
     general,
