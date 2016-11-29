@@ -15,37 +15,6 @@ PAM_EXTERN int pam_sm_setcred( pam_handle_t *pamh, int flags, int argc, const ch
     return PAM_SUCCESS;
 }
 
-std::string value_for_key(int argc, const char **argv, const std::string &key) {
-    int i = 0;
-    for(; i < argc; ++i) {
-        if (std::string(argv[i]).find(key) == 0) {
-            break;
-        }
-    }
-    if (i < argc) {
-        return std::string(argv[i]).substr(key.length()+1);
-    } else {
-        return "";
-    }
-}
-
-std::unique_ptr<Authenticator> get_authenticator(int argc, const char **argv) {
-    auto type = value_for_key(argc, argv, "type");
-#ifdef DEBUG
-    std::cout << "auth type: " << type << std::endl;
-#endif
-    if (type == "random") {
-        return get_random_authenticator();
-    } 
-    else if (type == "authy") {
-        auto config = value_for_key(argc, argv, "config");
-        if (!config.empty()) {
-            return get_authy_authenticator(config);
-        }
-    }
-    return get_empty_authenticator();
-}
-
 /* expected hook, this is where custom stuff happens */
 PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, const char **argv ) {
     int retval;

@@ -5,6 +5,8 @@
 #include <cpr/cpr.h>
 #include <json.hpp>
 
+#include "parameters.h"
+
 using json = nlohmann::json;
 using namespace std;
 
@@ -14,10 +16,11 @@ static const auto api_verify = api_url + "verify/";
 
 class AuthyAuthenticator : public Authenticator {
 public:
-    AuthyAuthenticator(const std::string &config) :
-        _config_file(config) 
+    AuthyAuthenticator(int argc, const char **argv)
     {
-        std::fstream conf_file(config);
+        const auto filename = value_for_key(argc, argv, "config");
+
+        std::fstream conf_file(filename);
         if (!conf_file.is_open()) {
             throw AuthError(Errors::config, "Unable to open config file");
         }
@@ -77,7 +80,6 @@ public:
     }
 
 private:
-    string _config_file;
     string _auth_id;
     nlohmann::json _config;
 
@@ -92,7 +94,7 @@ private:
 
 };
 
-std::unique_ptr<Authenticator> get_authy_authenticator(const std::string &config) {
-    std::unique_ptr<Authenticator> ret{new AuthyAuthenticator{config}};
+std::unique_ptr<Authenticator> get_authy_authenticator(int argc, const char **argv) {
+    std::unique_ptr<Authenticator> ret{new AuthyAuthenticator{argc, argv}};
     return ret;
 }

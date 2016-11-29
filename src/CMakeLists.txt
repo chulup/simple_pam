@@ -1,5 +1,6 @@
 set(PAM_SOURCES
     simple_pam.cpp
+    authenticator.cpp
     empty_authenticator.cpp
     authy_authenticator.cpp
     random_authenticator.cpp

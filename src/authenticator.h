@@ -12,9 +12,12 @@ public:
                                 const std::string& response) = 0;
 };
 
+std::unique_ptr<Authenticator> get_authenticator(int argc, const char **argv);
 std::unique_ptr<Authenticator> get_empty_authenticator();
 std::unique_ptr<Authenticator> get_random_authenticator();
-std::unique_ptr<Authenticator> get_authy_authenticator(const std::string &config);
+std::unique_ptr<Authenticator> get_authy_authenticator(int argc, const char **argv);
+
+std::string value_for_key(int argc, const char **argv, const std::string &key);
 
 enum class Errors {
     general,
