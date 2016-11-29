@@ -24,7 +24,7 @@ public:
 
         _config = json::parse(conf_file);
 
-        _auth_id = _config.value("auth-key", "");
+        _auth_id = _config.value("authy-key", "");
         if (_auth_id.empty()) {
             throw AuthError(Errors::config, "No Auth Key specified in config file");
         }
@@ -34,11 +34,7 @@ public:
     }
 
     std::string get_prompt(const std::string &username) override {
-        const auto user = _config["users"].value(username, json::object());
-        const auto id = user.value("id", "");
-        if (id.empty()) {
-            throw AuthError(Errors::user_unknown, "No entry for user");
-        }
+        const auto id = get_user_id(username);
 
         auto response = cpr::Get(api_request + id,
                 cpr::Header{{"X-Authy-API-Key", _auth_id}});
@@ -47,7 +43,7 @@ public:
             << response.header["context-type"] << std::endl;
 #endif
 
-        auto json = json::parse(response.text);
+        const auto json = json::parse(response.text);
 #ifdef DEBUG
         std::cout << json.dump(4) << std::endl;
 #endif
@@ -65,12 +61,7 @@ public:
 
     bool check_response(const std::string& username,
             const std::string& response) override {
-        const auto user = _config["users"].value(username, json::object());
-        const auto id = user.value("id", "");
-        if (id.empty()) {
-            throw AuthError(Errors::user_unknown, "No entry for user");
-        }
-
+        const auto id = get_user_id(username);
         auto result = cpr::Get(api_verify + response + "/" + id, 
                 cpr::Header{{"X-Authy-API-Key", _auth_id}});
 #ifdef DEBUG
@@ -85,6 +76,16 @@ private:
     string _config_file;
     string _auth_id;
     nlohmann::json _config;
+
+    std::string get_user_id(const std::string &username) {
+        const auto user = _config["users"].value(username, json::object());
+        const auto id = user.value("authy-id", "");
+        if (id.empty()) {
+            throw AuthError(Errors::user_unknown, "No entry for user");
+        }
+        return id;
+    }
+
 };
 
 std::unique_ptr<Authenticator> get_authy_authenticator(const std::string &config) {

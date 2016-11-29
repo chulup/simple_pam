@@ -1,8 +1,8 @@
 {
-    "auth-key": "XXX",
+    "authy-key": "XXX",
     "users": {
-        "chulup": {
-            "id": "0000"
+        "user0": {
+            "authy-id": "0000"
         }
     }
 }
