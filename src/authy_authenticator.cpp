@@ -22,7 +22,11 @@ public:
             throw AuthError(Errors::config, "Unable to open config file");
         }
 
-        _config = json::parse(conf_file);
+        try {
+            _config = json::parse(conf_file);
+        } catch(const std::exception &e) {
+            throw AuthError(Errors::config, string("Unable to open config file: ") + e.what());
+        }
 
         _auth_id = _config.value("authy-key", "");
         if (_auth_id.empty()) {
